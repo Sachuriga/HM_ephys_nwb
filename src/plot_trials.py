@@ -202,17 +202,21 @@ if __name__ == "__main__":
     else:
         print("No .txt file found for node sequences.")
 
-    # --- 1c. Find and Parse Metadata CSV ---
-    CSV_GLOB = str(work_dir / "*Metadata.csv")
-    csv_paths = sorted(glob.glob(CSV_GLOB))
+    # --- 1c. Find and Parse Metadata Excel File ---
+    # Look specifically for RecordingMeta.xlsx or fallback to any *RecordingMeta.xlsx
+    EXCEL_GLOB = str(work_dir / "RecordingMeta.xlsx")
+    excel_paths = sorted(glob.glob(EXCEL_GLOB))
+    if not excel_paths:
+        excel_paths = sorted(glob.glob(str(work_dir / "*RecordingMeta.xlsx")))
     
     session_meta = None
     trial_metadata = {} # Dictionary to store per-trial metadata
     
-    if csv_paths:
-        print(f"Found Metadata CSV: {csv_paths[0]}")
+    if excel_paths:
+        print(f"Found Metadata Excel: {excel_paths[0]}")
         try:
-            meta_df = pd.read_csv(csv_paths[0])
+            # Use read_excel instead of read_csv
+            meta_df = pd.read_excel(excel_paths[0])
             if not meta_df.empty:
                 session_meta = meta_df.iloc[0].to_dict() # For the cover page
                 
@@ -240,9 +244,9 @@ if __name__ == "__main__":
                     
                 print(f"Target Nodes and Trial Types loaded for {len(trial_metadata)} trials.")
         except Exception as e:
-            print(f"Error parsing metadata CSV: {e}")
+            print(f"Error parsing metadata Excel: {e}")
     else:
-        print("No *SessionMetadata.csv found. Proceeding without metadata.")
+        print("No RecordingMeta.xlsx found. Proceeding without metadata.")
 
     # --- Corrected Regex Patterns ---
     
@@ -384,7 +388,7 @@ if __name__ == "__main__":
     SMOOTH_SAMPLES_50 = max(1, int(round(5.0 * FS))) 
 
     # --- Load Node List and Build Graph ---
-    node_file_path = Path("src/tools/node_list_new.csv")
+    node_file_path = Path("tools/node_list_new.csv")
     nodes_data = None
     maze_graph = None
 
